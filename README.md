@@ -13,7 +13,7 @@ __Korean/Swiss hybrid teams are highly encouraged__
 * Are you fast enough? Forge WEP protected fragments in order to obtain a keystream larger than 8 bytes
 
 
-Please refer to the MAC Security Lab for important information about Monitor Mode, Python, Scapy, WiFi interfaces, etc.
+You will need Scapy but __not__ the Alfa interfaces this time. Please refer to the [MAC Security Lab](https://github.com/arubinst/SU19-WLANSec-Lab1-MAC) for important information about Monitor Mode, Python, Scapy, WiFi interfaces, etc.
 
 
 ## Your Work
@@ -24,7 +24,7 @@ In this part, you will recover the Python script [`manual-decryption.py`](./file
 
 - Open the capture file [`arp.cap`](./files/arp.cap) with Wireshark
    
-- Use Wireshark to decrypt the file. For this, you will need to configure in Wireshak WEP key. (In Wireshark : Preferences&rarr;Protocols&rarr;IEEE 802.11&rarr;Decryption Keys). You will also need to activate decryption in the IEEE 802.11 window (« Enable decryption »). You will find the WEP key in the Python Script [`manual-decryption.py`](./files/manual-decryption.py).
+- Use Wireshark to decrypt the file. For this, you will need to configure in Wireshak the WEP key. (In Wireshark : Preferences&rarr;Protocols&rarr;IEEE 802.11&rarr;Decryption Keys). You will also need to activate decryption in the IEEE 802.11 window (« Enable decryption »). You will find the WEP key in the Python Script [`manual-decryption.py`](./files/manual-decryption.py).
    
 - Execute the script with `python manual-decryption.py`
    
@@ -36,18 +36,24 @@ In this part, you will recover the Python script [`manual-decryption.py`](./file
 
 ### 2. Manual Encryption of WEP
 
-Using the script [`manual-decryption.py`](./files/manual-decryption.py) as a guide, create a new script `manual-encryption.py` capable of encrypting a message, save it in a pcap file and send it.
-So, you will need to create your message, calculate the Integrity Control (ICV), and encrypt it (see the theory slides for details).
+Using the script [`manual-decryption.py`](./files/manual-decryption.py) as a guide, create a new script `manual-encryption.py` capable of encrypting a message and saving it to a pcap file so that it could be sent to an AP our a receiving STA.
+
+So, basically, you will need to:
+
+1. Create your message
+2. Calculate the Integrity Control (ICV)
+3. Encrypt the message (see the [`manual-decryption.py`](./files/manual-decryption.py) script and the theory slides for details)
+4. Save the message to a pcap
 
 
 ### Some Details to Make your Life Easier:
 
-- You may use the same original arp frame as "Template" for your forged frame (actually... it this way!). You will need to update the data field (`wepdata`) and the integrity control field (`icv`).
-- The field `wepdata` accepts data in text format.
-- The field `icv` accepts data in « long » format.
-- You may guide yourself using the original script for the different format conversions that might be necessary.
-- You can export your new frame in pcap format using Scapy et then, import it in Wireshark. If Wireshark is capable of decrypting your forged frame, then you did a good job!
-- Format conversion will be your nightmare. If your script doesn't work (wireshark does not decrypt your frame), it will most probably be because of the way you calculated or you encoded the ICV. Typical problems are the endianness and the format. Try to understand what the original script does and remember that you will need to Keep trying... 
+- __THIS IS STRONGLY RECOMMENDED__: You may use the same original arp frame as "template" for your forged frame. Consider it an "empty" shell that you can fill up with your own data. The advantage is that this "shell" already has many parameters configured that would otherwise be hard to configure manually. You will need (at least) to update the data field (`wepdata`) and the integrity control field (`icv`). Optionally, you coud change the MAC adresses and other fields, but it is not required for this exercise. 
+- The field `wepdata` accepts data in __text__ format.
+- The field `icv` is a long int.
+- Use the original script as a guide for the different format conversions that might be necessary. Take into account that you may have to do some of them in reverse.
+- Export your new frame in pcap format using Scapy and then, read it in Wireshark. If Wireshark is capable of decrypting your forged frame, then you did a good job!
+- Format conversion will be your __nightmare__. If your script doesn't work (Wireshark does not decrypt your frame), it will most probably be because of the way you calculated or you encoded the ICV. Typical problems are the __endianness__ and the __format__. Try to understand what the original script does. 
 
 
 ### 3. Fragmentation (Bonus assignment)
@@ -63,6 +69,7 @@ Using your `manual-encryption.py` script, you will write a new one `encrypt-frag
 - All fragments except the last one carry the bit `more fragments` with a value of 1, to indicate that a new fragment will be received.
 - The field containing the "more fragments" bits is available in Scapy within the `FCfield` field. You will need to manipulate this field for your fragments. This same field is visible in Wireshark in IEEE 802.11 Data &rarr; Frame Control Field &rarr; Flags
 - To verify that this part works, you may import your fragments in Wireshark. It must be able to recompose the original frame, if you did a good job.
+- Try a long message. Short messages tend to fail. You can actually encrypt the same message in each fragment (so that Wireshark should show the message 3 times in a row).
 
 
 ## Deliverables
